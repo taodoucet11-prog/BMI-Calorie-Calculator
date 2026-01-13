@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BMI & Calorie Calculator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Base styles */
+    :root {
+      --primary: #059669;
+      --primary-light: #d1fae5;
+      --text: #111827;
+      --text-light: #6b7280;
+      --bg: #ffffff;
+      --card-bg: #f9fafb;
+      --border: #d1d5db;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      --radius: 8px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text: #f9fafb;
+        --text-light: #9ca3af;
+        --bg: #111827;
+        --card-bg: #1f2937;
+        --border: #374151;
+      }
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 1.5rem;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.875rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .subtitle {
+      font-family: 'Inter', sans-serif;
+      color: var(--text-light);
+      font-size: 1.125rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    label {
+      font-family: 'Inter', sans-serif;
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    input, select {
+      font-family: 'Inter', sans-serif;
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+
+    .toggle-group {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .toggle-btn {
+      font-family: 'Inter', sans-serif;
+      flex: 1;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      color: var(--text);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .toggle-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .toggle-btn:hover:not(.active) {
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    .height-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .error {
+      color: var(--danger);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+      display: none;
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .result-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    .result-title {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+    }
+
+    .bmi-value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 600;
+      text-align: center;
+      margin: 0.5rem 0;
+      color: var(--primary);
+    }
+
+    .bmi-category {
+      font-family: 'Montserrat', sans-serif;
+      text-align: center;
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .bmi-gauge {
+      height: 24px;
+      background: linear-gradient(to right, 
+        var(--danger) 0%, 
+        var(--danger) 18.5%, 
+        var(--warning) 18.5%, 
+        var(--warning) 25%, 
+        var(--success) 25%, 
+        var(--success) 30%, 
+        var(--warning) 30%, 
+        var(--warning) 35%, 
+        var(--danger) 35%, 
+        var(--danger) 100%);
+      border-radius: 12px;
+      position: relative;
+      margin: 1rem 0;
+      overflow: hidden;
+    }
+
+    .bmi-pointer {
+      position: absolute;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--text);
+      transform: translateX(-50%);
+    }
+
+    .calories-value {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 0.5rem 0;
+    }
+
+    .macros-list {
+      list-style: none;
+    }
+
+    .macro-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .macro-item:last-child {
+      border-bottom: none;
+    }
+
+    .macro-label {
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+    }
+
+    .macro-value {
+      font-family: 'Inter', sans-serif;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    @media (max-width: 600px) {
+      .height-inputs {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.875rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>BMI & Calorie Calculator</h1>
+      <p class="subtitle">Track your health metrics and nutrition goals</p>
+    </header>
+
+    <main>
+      <!-- Input Form -->
+      <div class="card">
+        <div class="form-group">
+          <label for="age">Age</label>
+          <input type="number" id="age" min="1" max="120" placeholder="Enter your age" aria-label="Age in years" />
+          <div class="error" id="age-error">Please enter your age</div>
+        </div>
+
+        <div class="form-group">
+          <label>Gender</label>
+          <div class="toggle-group" role="radiogroup" aria-labelledby="gender-label">
+            <button type="button" class="toggle-btn active" data-value="male" aria-checked="true" tabindex="0">Male</button>
+            <button type="button" class="toggle-btn" data-value="female" aria-checked="false" tabindex="0">Female</button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Weight</label>
+          <div class="toggle-group" style="margin-bottom: 0.5rem;">
+            <button type="button" class="toggle-btn active" data-unit="kg" aria-pressed="true">kg</button>
+            <button type="button" class="toggle-btn" data-unit="lbs" aria-pressed="false">lbs</button>
+          </div>
+          <input type="number" id="weight" min="1" step="0.1" placeholder="Enter your weight" aria-label="Weight" />
+          <div class="error" id="weight-error">Please enter your weight</div>
+        </div>
+
+        <div class="form-group">
+          <label>Height</label>
+          <div class="toggle-group" style="margin-bottom: 0.5rem;">
+            <button type="button" class="toggle-btn active" data-unit="cm" aria-pressed="true">cm</button>
+            <button type="button" class="toggle-btn" data-unit="ft-in" aria-pressed="false">ft/in</button>
+          </div>
+          <div class="height-inputs" id="height-inputs">
+            <input type="number" id="height-cm" min="50" max="250" step="0.1" placeholder="cm" aria-label="Height in centimeters" />
+          </div>
+          <div class="error" id="height-error">Please enter your height</div>
+        </div>
+
+        <div class="form-group">
+          <label for="activity">Activity Level</label>
+          <select id="activity" aria-label="Activity level">
+            <option value="1.2">Sedentary (little or no exercise)</option>
+            <option value="1.375">Lightly active (light exercise 1-3 days/week)</option>
+            <option value="1.55">Moderately active (moderate exercise 3-5 days/week)</option>
+            <option value="1.725">Very active (hard exercise 6-7 days/week)</option>
+            <option value="1.9">Extra active (very hard exercise & physical job)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Goal</label>
+          <div class="toggle-group" role="radiogroup" aria-labelledby="goal-label">
+            <button type="button" class="toggle-btn" data-value="lose" aria-checked="false" tabindex="0">Lose Weight</button>
+            <button type="button" class="toggle-btn active" data-value="maintain" aria-checked="true" tabindex="0">Maintain</button>
+            <button type="button" class="toggle-btn" data-value="gain" aria-checked="false" tabindex="0">Gain Muscle</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="results-grid">
+        <!-- BMI Result -->
+        <div class="result-card">
+          <div class="result-title">Body Mass Index (BMI)</div>
+          <div class="bmi-value" id="bmi-value">--</div>
+          <div class="bmi-category" id="bmi-category">--</div>
+          <div class="bmi-gauge">
+            <div class="bmi-pointer" id="bmi-pointer"></div>
+          </div>
+          <p style="font-size: 0.875rem; color: var(--text-light); margin-top: 0.5rem;">
+            BMI Categories: Underweight (<18.5), Healthy (18.5–24.9), Overweight (25–29.9), Obese (≥30)
+          </p>
+        </div>
+
+        <!-- Calorie & Macro Result -->
+        <div class="result-card">
+          <div class="result-title">Daily Nutrition Goals</div>
+          <div class="calories-value" id="calories-value">-- kcal</div>
+          <ul class="macros-list">
+            <li class="macro-item">
+              <span class="macro-label">Protein:</span>
+              <span class="macro-value" id="protein-value">--g</span>
+            </li>
+            <li class="macro-item">
+              <span class="macro-label">Carbs:</span>
+              <span class="macro-value" id="carbs-value">--g</span>
+            </li>
+            <li class="macro-item">
+              <span class="macro-label">Fats:</span>
+              <span class="macro-value" id="fats-value">--g</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // DOM Elements
+    const ageInput = document.getElementById('age');
+    const weightInput = document.getElementById('weight');
+    const heightCmInput = document.getElementById('height-cm');
+    const activitySelect = document.getElementById('activity');
+    const bmiValueEl = document.getElementById('bmi-value');
+    const bmiCategoryEl = document.getElementById('bmi-category');
+    const bmiPointerEl = document.getElementById('bmi-pointer');
+    const caloriesValueEl = document.getElementById('calories-value');
+    const proteinValueEl = document.getElementById('protein-value');
+    const carbsValueEl = document.getElementById('carbs-value');
+    const fatsValueEl = document.getElementById('fats-value');
+
+    // Error elements
+    const ageError = document.getElementById('age-error');
+    const weightError = document.getElementById('weight-error');
+    const heightError = document.getElementById('height-error');
+
+    // Toggle buttons - Get buttons from their specific containers
+    const genderButtons = document.querySelectorAll('.form-group:nth-child(2) .toggle-btn');
+    const weightUnitButtons = document.querySelectorAll('.form-group:nth-child(3) .toggle-btn');
+    const heightUnitButtons = document.querySelectorAll('.form-group:nth-child(4) .toggle-btn');
+    const goalButtons = document.querySelectorAll('.form-group:nth-child(6) .toggle-btn');
+
+    // State
+    let gender = 'male';
+    let weightUnit = 'kg';
+    let heightUnit = 'cm';
+    let goal = 'maintain';
+
+    // Initialize
+    console.log('Gender buttons found:', genderButtons.length);
+    console.log('Weight unit buttons found:', weightUnitButtons.length);
+    console.log('Height unit buttons found:', heightUnitButtons.length);
+    console.log('Goal buttons found:', goalButtons.length);
+    setupEventListeners();
+
+    function setupEventListeners() {
+      // Gender toggle
+      genderButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          genderButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          gender = btn.dataset.value;
+          console.log('Gender set to:', gender); // Debug feedback
+          updateResults();
+        });
+      });
+
+      // Weight unit toggle
+      weightUnitButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          weightUnitButtons.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-pressed', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-pressed', 'true');
+          weightUnit = btn.dataset.unit;
+          console.log('Weight unit set to:', weightUnit); // Debug feedback
+          updateResults();
+        });
+      });
+
+      // Height unit toggle
+      heightUnitButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          heightUnitButtons.forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-pressed', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-pressed', 'true');
+          heightUnit = btn.dataset.unit;
+          console.log('Height unit set to:', heightUnit); // Debug feedback
+
+          // Toggle height input fields
+          const heightInputsContainer = document.getElementById('height-inputs');
+          heightInputsContainer.innerHTML = '';
+          if (heightUnit === 'cm') {
+            heightInputsContainer.innerHTML = '<input type="number" id="height-cm" min="50" max="250" step="0.1" placeholder="cm" aria-label="Height in centimeters" />';
+          } else {
+            heightInputsContainer.innerHTML = `
+              <input type="number" id="height-ft" min="2" max="8" placeholder="ft" aria-label="Height in feet" />
+              <input type="number" id="height-in" min="0" max="11" placeholder="in" aria-label="Height in inches" />
+            `;
+          }
+          document.getElementById('height-cm')?.addEventListener('input', updateResults);
+          document.getElementById('height-ft')?.addEventListener('input', updateResults);
+          document.getElementById('height-in')?.addEventListener('input', updateResults);
+          updateResults();
+        });
+      });
+
+      // Goal toggle
+      goalButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          goalButtons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          goal = btn.dataset.value;
+          console.log('Goal set to:', goal); // Debug feedback
+          updateResults();
+        });
+      });
+
+      // Input events
+      ageInput.addEventListener('input', updateResults);
+      weightInput.addEventListener('input', updateResults);
+      heightCmInput.addEventListener('input', updateResults);
+      activitySelect.addEventListener('change', updateResults);
+
+      // Also attach to dynamically created inputs
+      document.addEventListener('input', (e) => {
+        if (e.target.id === 'height-ft' || e.target.id === 'height-in') {
+          updateResults();
+        }
+      });
+    }
+
+    function validateInputs() {
+      let isValid = true;
+
+      // Age
+      if (!ageInput.value || ageInput.value <= 0) {
+        ageError.classList.add('show');
+        isValid = false;
+      } else {
+        ageError.classList.remove('show');
+      }
+
+      // Weight
+      if (!weightInput.value || weightInput.value <= 0) {
+        weightError.classList.add('show');
+        isValid = false;
+      } else {
+        weightError.classList.remove('show');
+      }
+
+      // Height
+      let heightCm = null;
+      if (heightUnit === 'cm') {
+        heightCm = parseFloat(heightCmInput.value);
+        if (!heightCm || heightCm <= 0) {
+          heightError.classList.add('show');
+          isValid = false;
+        } else {
+          heightError.classList.remove('show');
+        }
+      } else {
+        const ft = parseFloat(document.getElementById('height-ft')?.value || 0);
+        const inch = parseFloat(document.getElementById('height-in')?.value || 0);
+        if ((isNaN(ft) || ft <= 0) && (isNaN(inch) || inch <= 0)) {
+          heightError.classList.add('show');
+          isValid = false;
+        } else {
+          heightError.classList.remove('show');
+          heightCm = (ft * 30.48) + (inch * 2.54);
+        }
+      }
+
+      return { isValid, heightCm };
+    }
+
+    function getWeightInKg() {
+      const weight = parseFloat(weightInput.value);
+      if (weightUnit === 'kg') {
+        return weight;
+      } else {
+        return weight * 0.45359237; // lbs to kg
+      }
+    }
+
+    function calculateBMI(weightKg, heightCm) {
+      const heightM = heightCm / 100;
+      return weightKg / (heightM * heightM);
+    }
+
+    function getBMICategory(bmi) {
+      if (bmi < 18.5) return { category: 'Underweight', color: '#ef4444' };
+      if (bmi < 25) return { category: 'Healthy', color: '#10b981' };
+      if (bmi < 30) return { category: 'Overweight', color: '#f59e0b' };
+      return { category: 'Obese', color: '#ef4444' };
+    }
+
+    function calculateTDEE(weightKg, heightCm, age, gender, activityFactor) {
+      // Mifflin-St Jeor Equation
+      let bmr;
+      if (gender === 'male') {
+        bmr = 10 * weightKg + 6.25 * heightCm - 5 * age + 5;
+      } else {
+        bmr = 10 * weightKg + 6.25 * heightCm - 5 * age - 161;
+      }
+      return bmr * parseFloat(activityFactor);
+    }
+
+    function calculateMacros(tdee, goal) {
+      let adjustedCalories = tdee;
+      if (goal === 'lose') {
+        adjustedCalories = tdee - 500; // ~1 lb/week deficit
+      } else if (goal === 'gain') {
+        adjustedCalories = tdee + 300; // moderate surplus
+      }
+
+      // Protein: 2.2g per kg body weight (for muscle gain/maintenance)
+      const weightKg = getWeightInKg();
+      const proteinGrams = Math.round(2.2 * weightKg);
+      const proteinCalories = proteinGrams * 4;
+
+      // Fats: 25% of total calories
+      const fatCalories = adjustedCalories * 0.25;
+      const fatGrams = Math.round(fatCalories / 9);
+
+      // Carbs: remaining calories
+      const carbCalories = adjustedCalories - proteinCalories - fatCalories;
+      const carbGrams = Math.max(0, Math.round(carbCalories / 4));
+
+      return {
+        calories: Math.round(adjustedCalories),
+        protein: proteinGrams,
+        carbs: carbGrams,
+        fats: fatGrams
+      };
+    }
+
+    function updateResults() {
+      const { isValid, heightCm } = validateInputs();
+      if (!isValid || heightCm === null) {
+        resetResults();
+        return;
+      }
+
+      const weightKg = getWeightInKg();
+      const age = parseInt(ageInput.value);
+      const activityFactor = activitySelect.value;
+
+      // BMI Calculation
+      const bmi = calculateBMI(weightKg, heightCm);
+      const { category } = getBMICategory(bmi);
+
+      // Update BMI display
+      bmiValueEl.textContent = bmi.toFixed(1);
+      bmiCategoryEl.textContent = category;
+
+      // Update BMI gauge pointer
+      // Map BMI 10-50 to 0%-100% of gauge width
+      const gaugeMin = 10;
+      const gaugeMax = 50;
+      const clampedBmi = Math.min(Math.max(bmi, gaugeMin), gaugeMax);
+      const percentage = ((clampedBmi - gaugeMin) / (gaugeMax - gaugeMin)) * 100;
+      bmiPointerEl.style.left = `${percentage}%`;
+
+      // Calorie & Macro Calculation
+      const tdee = calculateTDEE(weightKg, heightCm, age, gender, activityFactor);
+      const macros = calculateMacros(tdee, goal);
+
+      // Update calorie & macro display
+      caloriesValueEl.textContent = `${macros.calories} kcal`;
+      proteinValueEl.textContent = `${macros.protein}g`;
+      carbsValueEl.textContent = `${macros.carbs}g`;
+      fatsValueEl.textContent = `${macros.fats}g`;
+    }
+
+    function resetResults() {
+      bmiValueEl.textContent = '--';
+      bmiCategoryEl.textContent = '--';
+      bmiPointerEl.style.left = '0%';
+      caloriesValueEl.textContent = '-- kcal';
+      proteinValueEl.textContent = '--g';
+      carbsValueEl.textContent = '--g';
+      fatsValueEl.textContent = '--g';
+    }
+
+    // Initial call to set up height inputs
+    heightUnitButtons[0].click();
+  </script>
+</body>
+</html>
