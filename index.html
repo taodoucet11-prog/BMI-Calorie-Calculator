@@ -515,7 +515,8 @@
       // Height
       let heightCm = null;
       if (heightUnit === 'cm') {
-        heightCm = parseFloat(heightCmInput.value);
+        const currentHeightCmInput = document.getElementById('height-cm');
+        heightCm = parseFloat(currentHeightCmInput?.value || 0);
         if (!heightCm || heightCm <= 0) {
           heightError.classList.add('show');
           isValid = false;
