@@ -295,7 +295,7 @@
 
         <div class="form-group">
           <label>Weight</label>
-          <div class="toggle-group" style="margin-bottom: 0.5rem;">
+          <div class="toggle-group" style="margin-bottom: 0.5rem;" data-unit-group="weight">
             <button type="button" class="toggle-btn active" data-unit="kg" aria-pressed="true">kg</button>
             <button type="button" class="toggle-btn" data-unit="lbs" aria-pressed="false">lbs</button>
           </div>
@@ -305,7 +305,7 @@
 
         <div class="form-group">
           <label>Height</label>
-          <div class="toggle-group" style="margin-bottom: 0.5rem;">
+          <div class="toggle-group" style="margin-bottom: 0.5rem;" data-unit-group="height">
             <button type="button" class="toggle-btn active" data-unit="cm" aria-pressed="true">cm</button>
             <button type="button" class="toggle-btn" data-unit="ft-in" aria-pressed="false">ft/in</button>
           </div>
@@ -394,10 +394,10 @@
     const heightError = document.getElementById('height-error');
 
     // Toggle buttons - Get buttons from their specific containers
-    const genderButtons = document.querySelectorAll('.form-group:nth-child(2) .toggle-btn');
-    const weightUnitButtons = document.querySelectorAll('.form-group:nth-child(3) .toggle-btn');
-    const heightUnitButtons = document.querySelectorAll('.form-group:nth-child(4) .toggle-btn');
-    const goalButtons = document.querySelectorAll('.form-group:nth-child(6) .toggle-btn');
+    const genderButtons = document.querySelectorAll('div[role="radiogroup"] .toggle-btn');
+    const weightUnitButtons = document.querySelectorAll('div[data-unit-group="weight"] .toggle-btn');
+    const heightUnitButtons = document.querySelectorAll('div[data-unit-group="height"] .toggle-btn');
+    const goalButtons = document.querySelectorAll('div[role="radiogroup"]:last-of-type .toggle-btn');
 
     // State
     let gender = 'male';
